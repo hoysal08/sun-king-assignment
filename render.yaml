@@ -42,7 +42,7 @@ services:
     healthCheckPath: /actuator/health
 
   # Zookeeper - Background Service
-  - type: background
+  - type: worker
     name: zookeeper
     runtime: docker
     image: confluentinc/cp-zookeeper:7.5.0
@@ -54,7 +54,7 @@ services:
     plan: starter
 
   # Kafka - Background Service
-  - type: background
+  - type: worker
     name: kafka
     runtime: docker
     image: confluentinc/cp-kafka:7.5.0
