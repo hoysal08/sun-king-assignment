@@ -1,13 +1,91 @@
 services:
-  # This tells Render to use docker-compose.yml
+  # Order Service - Public Web Service
   - type: web
-    name: oms-stack
-    dockerComposeFile: ./docker-compose.yml
-    dockerComposeService: order-service
+    name: order-service
+    runtime: docker
+    dockerfilePath: ./order-service/Dockerfile
+    dockerContext: .
     plan: starter
-    
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://order-db:5432/orderdb
+      - key: SPRING_DATASOURCE_USERNAME
+        value: orderuser
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: orderpass
+      - key: SPRING_KAFKA_BOOTSTRAP_SERVERS
+        value: kafka:29092
+      - key: INVENTORY_SERVICE_URL
+        value: http://inventory-service:8082
+    healthCheckPath: /actuator/health
+
+  # Inventory Service - Public Web Service
   - type: web
     name: inventory-service
-    dockerComposeFile: ./docker-compose.yml
-    dockerComposeService: inventory-service
+    runtime: docker
+    dockerfilePath: ./inventory-service/Dockerfile
+    dockerContext: .
     plan: starter
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://inventory-db:5432/inventorydb
+      - key: SPRING_DATASOURCE_USERNAME
+        value: inventoryuser
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: inventorypass
+      - key: SPRING_KAFKA_BOOTSTRAP_SERVERS
+        value: kafka:29092
+    healthCheckPath: /actuator/health
+
+  # Zookeeper - Background Service
+  - type: background
+    name: zookeeper
+    runtime: docker
+    image: confluentinc/cp-zookeeper:7.5.0
+    envVars:
+      - key: ZOOKEEPER_CLIENT_PORT
+        value: "2181"
+      - key: ZOOKEEPER_TICK_TIME
+        value: "2000"
+    plan: starter
+
+  # Kafka - Background Service
+  - type: background
+    name: kafka
+    runtime: docker
+    image: confluentinc/cp-kafka:7.5.0
+    envVars:
+      - key: KAFKA_BROKER_ID
+        value: "1"
+      - key: KAFKA_ZOOKEEPER_CONNECT
+        value: zookeeper:2181
+      - key: KAFKA_ADVERTISED_LISTENERS
+        value: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      - key: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+        value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - key: KAFKA_INTER_BROKER_LISTENER_NAME
+        value: PLAINTEXT
+      - key: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+        value: "1"
+      - key: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+        value: "true"
+    plan: starter
+
+databases:
+  # Order Database - Managed PostgreSQL (easier for MVP)
+  - name: order-db
+    databaseName: orderdb
+    user: orderuser
+    plan: starter
+    postgresMajorVersion: 16
+
+  # Inventory Database - Managed PostgreSQL
+  - name: inventory-db
+    databaseName: inventorydb
+    user: inventoryuser
+    plan: starter
+    postgresMajorVersion: 16
