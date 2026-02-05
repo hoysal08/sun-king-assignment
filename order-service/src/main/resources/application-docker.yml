@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://order-db:5432/orderdb
+    username: orderuser
+    password: orderpass
+
+  kafka:
+    bootstrap-servers: kafka:29092
+
+app:
+  kafka:
+    topics:
+      order-events: order-events
+  inventory-service:
+    url: http://inventory-service:8082

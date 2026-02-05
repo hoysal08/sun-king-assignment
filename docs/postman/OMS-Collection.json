@@ -1,0 +1,411 @@
+{
+  "info": {
+    "name": "OMS - Order Management System",
+    "description": "Collection for testing the Order Management System microservices.\n\n## Services\n- **Order Service**: http://localhost:8081\n- **Inventory Service**: http://localhost:8082\n\n## Quick Start\n1. Start infrastructure: `docker-compose up -d`\n2. Build and run services\n3. Import this collection to Postman\n4. Run the requests in order",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "order_service_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "inventory_service_url",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Inventory Service",
+      "description": "Inventory management endpoints",
+      "item": [
+        {
+          "name": "List All Products (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory?page=0&size=10",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by SKU",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/LAPTOP-001",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "LAPTOP-001"]
+            }
+          }
+        },
+        {
+          "name": "Check Stock Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/LAPTOP-001/stock",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "LAPTOP-001", "stock"]
+            }
+          }
+        },
+        {
+          "name": "Create New Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"KEYBOARD-001\",\n  \"name\": \"Mechanical Gaming Keyboard\",\n  \"description\": \"RGB mechanical keyboard with Cherry MX switches\",\n  \"quantity\": 150,\n  \"price\": 149.99\n}"
+            },
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory"]
+            }
+          }
+        },
+        {
+          "name": "Update Stock Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 200\n}"
+            },
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/LAPTOP-001",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "LAPTOP-001"]
+            }
+          }
+        },
+        {
+          "name": "Reserve Stock (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Order-Id", "value": "{{order_id}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/LAPTOP-001/reserve",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "LAPTOP-001", "reserve"]
+            }
+          }
+        },
+        {
+          "name": "Release Reserved Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Order-Id", "value": "{{order_id}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/LAPTOP-001/release",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "LAPTOP-001", "release"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{inventory_service_url}}/actuator/health",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Service",
+      "description": "Order management endpoints",
+      "item": [
+        {
+          "name": "Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('order_id', jsonData.data.id);",
+                  "    console.log('Order ID saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"CUST-001\",\n  \"items\": [\n    {\n      \"sku\": \"LAPTOP-001\",\n      \"quantity\": 1\n    },\n    {\n      \"sku\": \"PHONE-001\",\n      \"quantity\": 2\n    }\n  ],\n  \"shippingAddress\": \"123 Main Street, San Francisco, CA 94102\"\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Order Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "List Orders (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders?page=0&size=10",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders by Customer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders?customerId=CUST-001",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [
+                {"key": "customerId", "value": "CUST-001"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders?status=CONFIRMED",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"],
+              "query": [
+                {"key": "status", "value": "CONFIRMED"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status to PROCESSING",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROCESSING\",\n  \"reason\": \"Order being prepared for shipment\"\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status to SHIPPED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SHIPPED\",\n  \"reason\": \"Shipped via FedEx - Tracking: FX123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status to DELIVERED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\",\n  \"reason\": \"Delivered to customer\"\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}/status",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/{{order_id}}/cancel?reason=Customer%20changed%20mind",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}", "cancel"],
+              "query": [
+                {"key": "reason", "value": "Customer changed mind"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/actuator/health",
+              "host": ["{{order_service_url}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "description": "Test error handling",
+      "item": [
+        {
+          "name": "Place Order - Insufficient Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"CUST-002\",\n  \"items\": [\n    {\n      \"sku\": \"LAPTOP-001\",\n      \"quantity\": 99999\n    }\n  ],\n  \"shippingAddress\": \"456 Test Street\"\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Non-existent Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders/00000000-0000-0000-0000-000000000000",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders", "00000000-0000-0000-0000-000000000000"]
+            }
+          }
+        },
+        {
+          "name": "Get Non-existent Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{inventory_service_url}}/api/v1/inventory/INVALID-SKU",
+              "host": ["{{inventory_service_url}}"],
+              "path": ["api", "v1", "inventory", "INVALID-SKU"]
+            }
+          }
+        },
+        {
+          "name": "Invalid Order Request (Validation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"\",\n  \"items\": []\n}"
+            },
+            "url": {
+              "raw": "{{order_service_url}}/api/v1/orders",
+              "host": ["{{order_service_url}}"],
+              "path": ["api", "v1", "orders"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

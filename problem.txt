@@ -1,0 +1,38 @@
+﻿Case Study: Scalable Microservices for an E-Commerce Platform
+Context:
+You are working as a backend developer at a growing e-commerce company. The company has been facing challenges with its current monolithic application due to scalability issues during peak shopping seasons (e.g., Black Friday). The business wants to transition to a microservices architecture to improve scalability, resilience, and maintainability.
+Problem:
+The current application’s "Order Management System" (OMS) has been identified as a bottleneck. The task is to design and implement a simplified version of the OMS as a microservice. The new service should handle placing orders, updating order statuses, and managing inventory. Additionally, it must be able to handle spikes in traffic gracefully.
+Requirements:
+1. Order Placement:
+   * Accept and process new orders.
+   * Validate that enough inventory exists before confirming the order.
+   * On order placement, reduce the corresponding inventory count.
+2. Order Status Update:
+   * Implement an endpoint to update the status of an existing order (e.g., from "Pending" to "Shipped").
+3. Inventory Management:
+   * Manage inventory counts for different products.
+   * Ensure race conditions are handled during concurrent order placements to avoid overselling products.
+4. Scalability:
+   * Ensure that the service is scalable and can handle traffic spikes (e.g., through queue-based order processing or other mechanisms).
+   * Consider a rate-limiting strategy to prevent the system from being overwhelmed during peak hours.
+5. Error Handling:
+   * Implement robust error handling for scenarios like failed orders, unavailable inventory, etc.
+   * Provide meaningful responses and error codes for client applications.
+6. Tech Stack:
+   * Language - Java.
+   * Use an appropriate database (SQL or NoSQL) to handle inventory and order data.
+   * Ensure that the system design is extensible for future growth.
+Bonus (if time permits):
+1. Implement a retry mechanism for failed orders.
+2. Integrate a message queue (e.g., RabbitMQ or Kafka) for processing orders asynchronously to simulate real-world scalability.
+
+Expected Deliverables:
+1. A functioning microservice with endpoints for placing orders, updating order status, and managing inventory.
+2. Documentation explaining the design, API endpoints, and how to run the service.
+3. Optional: Brief explanation of how you’d scale this further in a production environment (e.g., database optimization, horizontal scaling).
+
+
+1. Postman collection for APIs
+2. Github repo
+3. DDL of the tables created 

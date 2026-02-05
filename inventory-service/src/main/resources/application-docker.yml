@@ -1,0 +1,16 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://inventory-db:5432/inventorydb
+    username: inventoryuser
+    password: inventorypass
+
+  kafka:
+    bootstrap-servers: kafka:29092
+
+app:
+  kafka:
+    topics:
+      inventory-events: inventory-events
