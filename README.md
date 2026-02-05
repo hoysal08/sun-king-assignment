@@ -193,7 +193,24 @@ See `docs/ddl/` for complete DDL scripts.
 2. **Connection Pooling**: HikariCP with optimized settings
 3. **Indexes**: Pre-created for common query patterns
 
-### Deploy with Docker
+## ☁️ GCP VM Deployment
+
+For simple deployment on a GCP VM instance:
+
+1. **Upload project to VM** (via git clone or scp)
+2. **Run deployment script**:
+   ```bash
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+3. **Open firewall ports** in GCP Console:
+   - Port `8081` for Order Service
+   - Port `8082` for Inventory Service
+4. **Access services**:
+   - Order Service Swagger: `http://YOUR_VM_IP:8081/swagger-ui.html`
+   - Inventory Service Swagger: `http://YOUR_VM_IP:8082/swagger-ui.html`
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
 ## 📝 Design Patterns Used
 
