@@ -45,19 +45,22 @@ services:
   - type: worker
     name: zookeeper
     runtime: docker
-    image: confluentinc/cp-zookeeper:7.5.0
+    dockerfilePath: ./zookeeper/Dockerfile
+    dockerContext: .
+    plan: starter
     envVars:
       - key: ZOOKEEPER_CLIENT_PORT
         value: "2181"
       - key: ZOOKEEPER_TICK_TIME
         value: "2000"
-    plan: starter
 
   # Kafka - Background Service
   - type: worker
     name: kafka
     runtime: docker
-    image: confluentinc/cp-kafka:7.5.0
+    dockerfilePath: ./kafka/Dockerfile
+    dockerContext: .
+    plan: starter
     envVars:
       - key: KAFKA_BROKER_ID
         value: "1"
@@ -73,10 +76,9 @@ services:
         value: "1"
       - key: KAFKA_AUTO_CREATE_TOPICS_ENABLE
         value: "true"
-    plan: starter
 
 databases:
-  # Order Database - Managed PostgreSQL (easier for MVP)
+  # Order Database - Managed PostgreSQL
   - name: order-db
     databaseName: orderdb
     user: orderuser
