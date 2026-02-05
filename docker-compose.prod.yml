@@ -54,20 +54,25 @@ services:
     container_name: oms-kafka
     restart: unless-stopped
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_started
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     healthcheck:
-      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:29092 || exit 1" ]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
     networks:
       - oms-network
 
@@ -81,7 +86,7 @@ services:
       order-db:
         condition: service_healthy
       kafka:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "8081:8081"
     environment:
@@ -104,7 +109,7 @@ services:
       inventory-db:
         condition: service_healthy
       kafka:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "8082:8082"
     environment:
