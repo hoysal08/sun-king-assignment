@@ -1,0 +1,13 @@
+services:
+  # This tells Render to use docker-compose.yml
+  - type: web
+    name: oms-stack
+    dockerComposeFile: ./docker-compose.yml
+    dockerComposeService: order-service
+    plan: starter
+    
+  - type: web
+    name: inventory-service
+    dockerComposeFile: ./docker-compose.yml
+    dockerComposeService: inventory-service
+    plan: starter
